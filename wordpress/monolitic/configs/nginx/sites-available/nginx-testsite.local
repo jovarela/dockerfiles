@@ -1,0 +1,110 @@
+server {
+    #add_header x-debug-site-server-default "with $scheme:$uri";
+
+    server_name  _;
+    rewrite ^ $scheme://testsite.local$request_uri redirect;
+}
+
+server {
+    listen   80;
+    listen   [::]:80 default ipv6only=on; 
+    server_name testsite.local;
+
+    access_log /var/log/nginx/testsite_access.log;
+    error_log /var/log/nginx/testsite_error.log debug;
+    rewrite_log on;
+
+    root /srv/www/vhost.testsite.local/www;
+    index index.php index.html index.htm;
+
+    # Disable sendfile as per https://docs.vagrantup.com/v2/synced-folders/virtualbox.html
+    sendfile off;
+
+    include global/restrictions.conf;
+
+    # Additional rules go here.
+
+    # Only include one of the files below.
+    include global/wordpress.conf;
+    #include global/wordpress-ms-subdir.conf;
+    #include global/wordpress-ms-subdomain.conf;
+}
+
+    # Only for nginx-naxsi : process denied requests
+    #location /RequestDenied {
+        # For example, return an error code
+        #return 418;
+    #}
+
+# Virtual host templates
+#
+#server {
+#   listen 8000;
+#   listen [::]:8000 default ipv6only=on;
+#   listen somename:8080;
+#   server_name somename alias another.alias;
+#
+#   access_log /var/log/nginx/somename_access.log;
+#   error_log /var/log/nginx/somename_error.log debug;
+#   rewrite_log on;
+#
+#   root /srv/vhost.somename/www;
+#   index index.html index.htm;
+#
+#   include global/restrictions.conf;
+#
+#   location /doc/ {
+#       alias /usr/share/doc/;
+#       autoindex on;
+#       allow 127.0.0.1;
+#       allow ::1;
+#       deny all;
+#   }
+#
+#   error_page 404 /404.html;
+#   error_page 500 502 503 504 /50x.html;
+#   location = /50x.html {
+#       root /usr/share/nginx/www;
+#   }
+#
+#   location / {
+#       try_files $uri $uri/ /index.html;
+#   }
+#}
+
+# HTTPS server
+#
+#server {
+#   listen 443;
+#   listen [::]:443 default ipv6only=on;
+#   server_name localhost;
+#
+#   access_log /var/log/nginx/access.log;
+#   error_log /var/log/nginx/error.log;
+#   rewrite_log on;
+#
+#   root /srv/vhost.somename/www;
+#   index index.html index.htm;
+#
+#   ssl on;
+#   ssl_certificate cert.pem;
+#   ssl_certificate_key cert.key;
+#
+#   ssl_session_timeout 5m;
+#
+#   ssl_protocols SSLv3 TLSv1;
+#   ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
+#   ssl_prefer_server_ciphers on;
+#
+#   include global/restrictions.conf;
+#
+#   location / {
+#       try_files $uri $uri/ /index.html;
+#   }
+#}
+
+# Other template references:
+#  - http://wiki.nginx.org/Pitfalls
+#  - http://wiki.nginx.org/QuickStart
+#  - http://wiki.nginx.org/Configuration
+#  - /usr/share/doc/nginx-doc/examples/
